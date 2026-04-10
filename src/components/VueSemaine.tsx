@@ -58,7 +58,7 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
 
   return (
     // Tout dans un seul conteneur défilant pour garantir l'alignement parfait des colonnes
-    <div className="h-full overflow-y-auto overflow-x-hidden">
+    <div className="h-full overflow-y-auto">
 
       {/* ── En-têtes jours (sticky) ────────────────────────────── */}
       <div
