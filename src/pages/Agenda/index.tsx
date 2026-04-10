@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { format, parseISO } from 'date-fns'
+import { format, parseISO, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths } from 'date-fns'
 import VueMois    from '../../components/VueMois'
 import VueSemaine from '../../components/VueSemaine'
 import VueJour    from '../../components/VueJour'
@@ -222,6 +222,18 @@ export default function Agenda() {
             className="px-2.5 py-1 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 flex-shrink-0"
           >
             Aujourd'hui
+          </button>
+          <button
+            onClick={() => setDateRef(d => vue === 'jour' ? subDays(d, 1) : vue === 'semaine' ? subWeeks(d, 1) : subMonths(d, 1))}
+            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 flex-shrink-0 text-sm leading-none"
+          >
+            ‹
+          </button>
+          <button
+            onClick={() => setDateRef(d => vue === 'jour' ? addDays(d, 1) : vue === 'semaine' ? addWeeks(d, 1) : addMonths(d, 1))}
+            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 flex-shrink-0 text-sm leading-none"
+          >
+            ›
           </button>
         </div>
 
