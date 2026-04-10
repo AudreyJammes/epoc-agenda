@@ -57,8 +57,8 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
   }
 
   return (
-    // Tout dans un seul conteneur défilant pour garantir l'alignement parfait des colonnes
-    <div className="h-full overflow-y-auto">
+    // scrollbar-gutter: stable garantit que la scrollbar ne décale pas les colonnes sticky
+    <div className="h-full overflow-y-auto" style={{ scrollbarGutter: 'stable' }}>
 
       {/* ── En-têtes jours (sticky) ────────────────────────────── */}
       <div
@@ -93,12 +93,12 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
         {jours.map(jour => {
           const evs = evJourneeDuJour(jour)
           return (
-            <div key={jour.toISOString()} className="flex-1 border-l border-gray-100 px-0.5 py-0.5 space-y-0.5">
+            <div key={jour.toISOString()} className="flex-1 min-w-0 overflow-hidden border-l border-gray-100 px-0.5 py-0.5 space-y-0.5">
               {evs.map(ev => (
                 <button
                   key={ev.id}
                   onClick={() => onEvenementClick(ev)}
-                  className={`w-full text-left rounded px-1 py-0.5 text-xs truncate ${TYPE_COLORS[ev.type].bg} ${TYPE_COLORS[ev.type].text} border-l-2 ${TYPE_COLORS[ev.type].border}`}
+                  className={`w-full text-left rounded px-1 py-0.5 text-xs truncate block ${TYPE_COLORS[ev.type].bg} ${TYPE_COLORS[ev.type].text} border-l-2 ${TYPE_COLORS[ev.type].border}`}
                   title={`${TYPE_LABELS[ev.type]} — ${ev.titre}`}
                 >
                   {ev.titre}
