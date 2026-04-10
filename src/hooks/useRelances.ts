@@ -10,7 +10,7 @@ export function useRelances() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('relances')
-        .select('id, contact_id, titre, date, heure, duree, synced')
+        .select('id, contact_id, titre, date, heure, duree')
         .not('date', 'is', null)
         .order('date', { ascending: true })
 
