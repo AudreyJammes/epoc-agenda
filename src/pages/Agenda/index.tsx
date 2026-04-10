@@ -223,22 +223,16 @@ export default function Agenda() {
           >
             Aujourd'hui
           </button>
+        </div>
+
+        {/* Flèches + sélecteur de vue */}
+        <div className="flex items-center rounded-lg border border-gray-200 overflow-hidden text-xs flex-shrink-0">
           <button
             onClick={() => setDateRef(d => vue === 'jour' ? subDays(d, 1) : vue === 'semaine' ? subWeeks(d, 1) : subMonths(d, 1))}
-            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 flex-shrink-0 text-sm leading-none"
+            className="px-2 py-1.5 text-gray-600 hover:bg-gray-50 font-medium border-r border-gray-200"
           >
             ‹
           </button>
-          <button
-            onClick={() => setDateRef(d => vue === 'jour' ? addDays(d, 1) : vue === 'semaine' ? addWeeks(d, 1) : addMonths(d, 1))}
-            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 flex-shrink-0 text-sm leading-none"
-          >
-            ›
-          </button>
-        </div>
-
-        {/* Sélecteur de vue */}
-        <div className="flex rounded-lg border border-gray-200 overflow-hidden text-xs flex-shrink-0">
           {(['jour', 'semaine', 'mois'] as Vue[]).map(v => (
             <button
               key={v}
@@ -252,6 +246,12 @@ export default function Agenda() {
               {v === 'jour' ? 'Jour' : v === 'semaine' ? 'Sem.' : 'Mois'}
             </button>
           ))}
+          <button
+            onClick={() => setDateRef(d => vue === 'jour' ? addDays(d, 1) : vue === 'semaine' ? addWeeks(d, 1) : addMonths(d, 1))}
+            className="px-2 py-1.5 text-gray-600 hover:bg-gray-50 font-medium border-l border-gray-200"
+          >
+            ›
+          </button>
         </div>
 
         {/* Menu */}
