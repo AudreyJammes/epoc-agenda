@@ -14,33 +14,28 @@ interface Props {
   onNouvelEvenement: (date: Date) => void
 }
 
-const HEURE_DEBUT = 7   // première ligne visible
-const HEURE_FIN   = 21  // dernière ligne
-const HAUTEUR_HEURE = 60 // px par heure
+const HEURE_DEBUT   = 7
+const HEURE_FIN     = 21
+const HAUTEUR_HEURE = 60  // px par heure
+const HEADER_H      = 64  // px — hauteur de la rangée d'en-têtes
+const JE_H          = 28  // px — hauteur minimale de la bande J.E.
 
 function topPx(date: Date): number {
-  const h = getHours(date) - HEURE_DEBUT
-  const m = getMinutes(date)
-  return (h * 60 + m) / 60 * HAUTEUR_HEURE
+  return ((getHours(date) - HEURE_DEBUT) * 60 + getMinutes(date)) / 60 * HAUTEUR_HEURE
 }
 
 function hauteurPx(debut: Date, fin: Date): number {
-  const mins = differenceInMinutes(fin, debut)
-  return Math.max(mins / 60 * HAUTEUR_HEURE, 20)
+  return Math.max(differenceInMinutes(fin, debut) / 60 * HAUTEUR_HEURE, 20)
 }
 
 export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNouvelEvenement }: Props) {
   const debutSemaine = startOfWeek(dateRef, { weekStartsOn: 1 })
   const finSemaine   = endOfWeek(dateRef,   { weekStartsOn: 1 })
-  const jours = eachDayOfInterval({ start: debutSemaine, end: finSemaine })
-
-  const heures = Array.from({ length: HEURE_FIN - HEURE_DEBUT }, (_, i) => HEURE_DEBUT + i)
+  const jours        = eachDayOfInterval({ start: debutSemaine, end: finSemaine })
+  const heures       = Array.from({ length: HEURE_FIN - HEURE_DEBUT }, (_, i) => HEURE_DEBUT + i)
   const totalHauteur = heures.length * HAUTEUR_HEURE
 
-  // Événements journée entière
-  const evJourneeEntiere = evenements.filter(e => e.journee_entiere)
-
-  function evsAvecHeureduJour(jour: Date): Evenement[] {
+  function evsAvecHeureDuJour(jour: Date): Evenement[] {
     const jourStr = format(jour, 'yyyy-MM-dd')
     return evenements.filter(e =>
       !e.journee_entiere &&
@@ -51,25 +46,28 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
     )
   }
 
-  function evJourneeEntiereDuJour(jour: Date): Evenement[] {
+  function evJourneeDuJour(jour: Date): Evenement[] {
     const jourStr = format(jour, 'yyyy-MM-dd')
-    return evJourneeEntiere.filter(e => {
+    return evenements.filter(e => {
+      if (!e.journee_entiere) return false
       const debut = e.date_journee ?? ''
       const fin   = e.date_fin_journee ?? debut
       return jourStr >= debut && jourStr <= fin
     })
   }
 
-  function handleClickCreneau(jour: Date, heure: number) {
-    const date = setMinutes(setHours(new Date(jour), heure), 0)
-    onNouvelEvenement(date)
-  }
-
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* En-têtes */}
-      <div className="flex border-b border-gray-200 bg-white z-10">
+    // Tout dans un seul conteneur défilant pour garantir l'alignement parfait des colonnes
+    <div className="h-full overflow-y-auto overflow-x-hidden">
+
+      {/* ── En-têtes jours (sticky) ────────────────────────────── */}
+      <div
+        className="sticky top-0 z-20 flex bg-white border-b border-gray-200"
+        style={{ height: HEADER_H }}
+      >
+        {/* Coin vide (largeur = colonne heures) */}
         <div className="w-12 flex-shrink-0" />
+
         {jours.map(jour => (
           <div key={jour.toISOString()} className="flex-1 text-center py-2 border-l border-gray-100">
             <div className="text-xs text-gray-500 uppercase">{format(jour, 'EEE', { locale: fr })}</div>
@@ -82,13 +80,18 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
         ))}
       </div>
 
-      {/* Bande journée entière */}
-      <div className="flex border-b border-gray-200 bg-white min-h-[28px]">
+      {/* ── Bande journée entière (sticky sous les en-têtes) ───── */}
+      <div
+        className="sticky z-20 flex bg-white border-b border-gray-200"
+        style={{ top: HEADER_H, minHeight: JE_H }}
+      >
+        {/* Étiquette J.E. */}
         <div className="w-12 flex-shrink-0 flex items-center justify-end pr-1">
           <span className="text-xs text-gray-400">J.E.</span>
         </div>
+
         {jours.map(jour => {
-          const evs = evJourneeEntiereDuJour(jour)
+          const evs = evJourneeDuJour(jour)
           return (
             <div key={jour.toISOString()} className="flex-1 border-l border-gray-100 px-0.5 py-0.5 space-y-0.5">
               {evs.map(ev => (
@@ -96,6 +99,7 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
                   key={ev.id}
                   onClick={() => onEvenementClick(ev)}
                   className={`w-full text-left rounded px-1 py-0.5 text-xs truncate ${TYPE_COLORS[ev.type].bg} ${TYPE_COLORS[ev.type].text} border-l-2 ${TYPE_COLORS[ev.type].border}`}
+                  title={`${TYPE_LABELS[ev.type]} — ${ev.titre}`}
                 >
                   {ev.titre}
                 </button>
@@ -105,14 +109,15 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
         })}
       </div>
 
-      {/* Grille horaire */}
-      <div className="flex flex-1 overflow-y-auto">
+      {/* ── Grille horaire ──────────────────────────────────────── */}
+      <div className="flex" style={{ height: totalHauteur }}>
+
         {/* Colonne heures */}
-        <div className="w-12 flex-shrink-0 relative" style={{ height: totalHauteur }}>
+        <div className="w-12 flex-shrink-0 relative bg-white" style={{ height: totalHauteur }}>
           {heures.map(h => (
             <div
               key={h}
-              className="absolute right-1 text-xs text-gray-400 -translate-y-2.5"
+              className="absolute right-1 text-xs text-gray-400 -translate-y-2.5 select-none"
               style={{ top: (h - HEURE_DEBUT) * HAUTEUR_HEURE }}
             >
               {h}h
@@ -122,7 +127,7 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
 
         {/* Colonnes jours */}
         {jours.map(jour => {
-          const evs = evsAvecHeureduJour(jour)
+          const evs = evsAvecHeureDuJour(jour)
           return (
             <div
               key={jour.toISOString()}
@@ -130,12 +135,12 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
               style={{ height: totalHauteur }}
               onClick={e => {
                 const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-                const y = e.clientY - rect.top
+                const y     = e.clientY - rect.top
                 const heure = Math.floor(y / HAUTEUR_HEURE) + HEURE_DEBUT
-                handleClickCreneau(jour, heure)
+                onNouvelEvenement(setMinutes(setHours(new Date(jour), heure), 0))
               }}
             >
-              {/* Lignes heures */}
+              {/* Lignes heure pleine */}
               {heures.map(h => (
                 <div
                   key={h}
@@ -143,7 +148,7 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
                   style={{ top: (h - HEURE_DEBUT) * HAUTEUR_HEURE }}
                 />
               ))}
-              {/* Ligne demi-heure */}
+              {/* Lignes demi-heure */}
               {heures.map(h => (
                 <div
                   key={`${h}-30`}
@@ -152,10 +157,10 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
                 />
               ))}
 
-              {/* Événements */}
+              {/* Événements horaires */}
               {evs.map(ev => {
-                const debut = parseISO(ev.date_debut!)
-                const fin   = ev.date_fin ? parseISO(ev.date_fin) : new Date(debut.getTime() + 60 * 60 * 1000)
+                const debut  = parseISO(ev.date_debut!)
+                const fin    = ev.date_fin ? parseISO(ev.date_fin) : new Date(debut.getTime() + 60 * 60 * 1000)
                 const colors = TYPE_COLORS[ev.type]
                 return (
                   <button
