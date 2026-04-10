@@ -251,7 +251,7 @@ export default function Agenda() {
             ⋯
           </button>
           {showMenu && (
-            <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-30 py-1 text-sm">
+            <div className="fixed right-3 top-10 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 text-sm">
               <a
                 href="https://crm.ecole-epoc.fr"
                 target="_blank"
