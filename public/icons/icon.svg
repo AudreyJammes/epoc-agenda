@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fond navy plein (maskable : pas de transparence) -->
+  <rect width="512" height="512" fill="#090253"/>
+  <!-- Texte EPOC centré -->
+  <text
+    x="256"
+    y="290"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="110"
+    font-weight="bold"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="8"
+  >EPOC</text>
+  <!-- Coeur blanc stylisé au-dessus -->
+  <text
+    x="256"
+    y="210"
+    font-family="Arial, sans-serif"
+    font-size="100"
+    fill="#eb3678"
+    text-anchor="middle"
+  >♥</text>
+</svg>
