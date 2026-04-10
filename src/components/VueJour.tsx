@@ -124,16 +124,24 @@ export default function VueJour({ dateRef, evenements, onEvenementClick, onNouve
             const debut  = parseISO(ev.date_debut!)
             const fin    = ev.date_fin ? parseISO(ev.date_fin) : new Date(debut.getTime() + 60 * 60 * 1000)
             const colors = TYPE_COLORS[ev.type]
+            const h      = hauteurPx(debut, fin) - 2
             return (
               <button
                 key={ev.id}
                 onClick={e => { e.stopPropagation(); onEvenementClick(ev) }}
-                className={`absolute left-2 right-2 rounded-lg px-3 py-1 text-sm text-left border-l-4 ${colors.bg} ${colors.text} ${colors.border} shadow hover:shadow-md transition-shadow`}
-                style={{ top: topPx(debut) + 1, height: hauteurPx(debut, fin) - 2 }}
+                className={`absolute left-2 right-2 rounded-lg px-2.5 py-1 text-sm text-left border-l-4 overflow-hidden ${colors.bg} ${colors.text} ${colors.border} shadow hover:shadow-md transition-shadow`}
+                style={{ top: topPx(debut) + 1, height: h }}
               >
-                <span className="font-semibold">{format(debut, 'HH:mm')} – {format(fin, 'HH:mm')}</span>
-                <span className="block truncate">{ev.titre}</span>
-                {ev.note && <span className="block text-xs opacity-70 truncate">{ev.note}</span>}
+                <p className="font-semibold text-xs leading-tight truncate">
+                  {format(debut, 'HH:mm')} – {format(fin, 'HH:mm')}
+                </p>
+                <p className="font-medium truncate leading-snug">{ev.titre}</p>
+                {h > 48 && ev.lieu && (
+                  <p className="text-xs opacity-70 truncate">📍 {ev.lieu}</p>
+                )}
+                {h > 60 && ev.note && (
+                  <p className="text-xs opacity-60 truncate">{ev.note}</p>
+                )}
               </button>
             )
           })}

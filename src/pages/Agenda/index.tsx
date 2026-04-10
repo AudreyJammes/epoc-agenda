@@ -7,7 +7,7 @@ import EvenementModal      from '../../components/EvenementModal'
 import ImportICS           from '../../components/ImportICS'
 import AlertePlanification from '../../components/AlertePlanification'
 import MiniCalendrier      from '../../components/MiniCalendrier'
-import { useEvenements, useAllEvenements, useInsertEvenementsEnMasse, useUpdateEvenement } from '../../hooks/useEvenements'
+import { useEvenements, useAllEvenements, useInsertEvenementsEnMasse } from '../../hooks/useEvenements'
 import { useTaches }  from '../../hooks/useTaches'
 import { useRelances } from '../../hooks/useRelances'
 import { useAuth } from '../../hooks/useAuth'
@@ -251,7 +251,17 @@ export default function Agenda() {
             ⋯
           </button>
           {showMenu && (
-            <div className="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-xl shadow-lg z-30 py-1 text-sm">
+            <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-30 py-1 text-sm">
+              <a
+                href="https://crm.ecole-epoc.fr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-gray-700"
+                onClick={() => setShowMenu(false)}
+              >
+                <span>↗</span> Ouvrir le CRM
+              </a>
+              <hr className="my-1 border-gray-100" />
               <button
                 onClick={() => { setShowImport(true); setShowMenu(false) }}
                 className="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700"
