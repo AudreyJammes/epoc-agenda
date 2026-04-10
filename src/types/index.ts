@@ -18,6 +18,7 @@ export interface Evenement {
   source_id: string | null
   recurrence_rule: string | null
   recurrence_groupe_id: string | null
+  user_id: string | null
   notif_envoyee: boolean
   created_at: string
 }
@@ -49,7 +50,6 @@ export interface Relance {
   date: string
   heure: string | null
   duree: number | null
-  synced: boolean
 }
 
 export interface EvenementFormData {

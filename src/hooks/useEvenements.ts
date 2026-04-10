@@ -52,6 +52,7 @@ export function useCreateEvenement() {
 
   return useMutation({
     mutationFn: async (form: EvenementFormData) => {
+      const { data: { user } } = await supabase.auth.getUser()
       let payload: Partial<Evenement>
 
       if (form.journee_entiere) {
@@ -67,6 +68,7 @@ export function useCreateEvenement() {
           lieu:             form.lieu || null,
           note:             form.note || null,
           source:           'manuel',
+          user_id:          user?.id ?? null,
         }
       } else {
         const debut = new Date(`${form.date_debut}T${form.heure_debut}:00`)
@@ -83,6 +85,7 @@ export function useCreateEvenement() {
           lieu:             form.lieu || null,
           note:             form.note || null,
           source:           'manuel',
+          user_id:          user?.id ?? null,
         }
       }
 
@@ -142,12 +145,13 @@ export function useInsertEvenementsEnMasse() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (evenements: Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee'>[]) => {
+    mutationFn: async (evenements: Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee' | 'user_id'>[]) => {
+      const { data: { user } } = await supabase.auth.getUser()
       const TAILLE_LOT = 100
       const resultats: Evenement[] = []
 
       for (let i = 0; i < evenements.length; i += TAILLE_LOT) {
-        const lot = evenements.slice(i, i + TAILLE_LOT)
+        const lot = evenements.slice(i, i + TAILLE_LOT).map(e => ({ ...e, user_id: e.user_id ?? user?.id ?? null }))
         const { data, error } = await supabase
           .from('agenda_evenements')
           .insert(lot)

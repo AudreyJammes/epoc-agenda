@@ -70,7 +70,7 @@ export function trouverCreneau(
 export function tacheVersEvenement(
   tache: Tache,
   creneau: { debut: Date; fin: Date }
-): Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee'> {
+): Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee' | 'user_id'> {
   return {
     titre:                tache.titre,
     type:                 'tache',

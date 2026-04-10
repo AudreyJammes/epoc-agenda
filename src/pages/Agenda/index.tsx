@@ -101,7 +101,7 @@ export default function Agenda() {
 
     if (!tachesASynchroniser.length) return
 
-    const nouveaux: Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee'>[] = []
+    const nouveaux: Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee' | 'user_id'>[] = []
     const impossibles: string[] = []
     const evsTravail = [...allEvs]
 
@@ -136,7 +136,7 @@ export default function Agenda() {
 
     if (!relancesNouvelles.length) return
 
-    const nouveaux: Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee'>[] = relancesNouvelles.map(r => {
+    const nouveaux: Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee' | 'user_id'>[] = relancesNouvelles.map(r => {
       const hasHeure = !!r.heure
       if (hasHeure) {
         const debut = new Date(`${r.date}T${r.heure}`)

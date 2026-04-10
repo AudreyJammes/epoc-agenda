@@ -33,9 +33,9 @@ function decodeIcsText(val: string): string {
 }
 
 // Parse un fichier .ics et retourne les événements à partir du 2026-01-01
-export function parseIcs(content: string): Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee'>[] {
+export function parseIcs(content: string): Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee' | 'user_id'>[] {
   const seuil = new Date('2026-01-01T00:00:00Z')
-  const evenements: Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee'>[] = []
+  const evenements: Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee' | 'user_id'>[] = []
 
   // Déplier les lignes repliées (RFC 5545 : continuation avec espace ou tabulation)
   const unfolded = content.replace(/\r?\n[ \t]/g, '')

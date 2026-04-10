@@ -29,7 +29,7 @@ export function genererOccurrences(
   form: EvenementFormData,
   recurrence_groupe_id: string,
   rule: string,
-): Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee'>[] {
+): Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee' | 'user_id'>[] {
   // Si pas de date de fin, générer sur 2 ans à partir de la date de début
   const dateRef = form.journee_entiere
     ? parseISO(form.date_journee)
@@ -37,10 +37,10 @@ export function genererOccurrences(
   const jusqu_au = form.recurrence_jusqu_au
     ? parseISO(form.recurrence_jusqu_au)
     : addYears(dateRef, 50)
-  const occurrences: Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee'>[] = []
+  const occurrences: Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee' | 'user_id'>[] = []
   const MAX_OCCURRENCES = 500 // sécurité
 
-  function baseOccurrence(dateDebut: Date, dateFin: Date): Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee'> {
+  function baseOccurrence(dateDebut: Date, dateFin: Date): Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee' | 'user_id'> {
     if (form.journee_entiere) {
       return {
         titre:                form.titre,
