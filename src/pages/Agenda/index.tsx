@@ -214,7 +214,7 @@ export default function Agenda() {
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden">
       {/* Barre de navigation */}
-      <header className="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-gray-200 bg-white z-20 gap-2">
+      <header className="relative flex items-center justify-between px-3 sm:px-4 py-2 border-b border-gray-200 bg-white gap-2" style={{ zIndex: 1000 }}>
         {/* Titre + nav */}
         <div className="flex items-center gap-1 min-w-0">
           <button
@@ -251,7 +251,7 @@ export default function Agenda() {
             ⋯
           </button>
           {showMenu && (
-            <div className="fixed right-3 top-10 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 text-sm">
+            <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg py-1 text-sm" style={{ zIndex: 2000 }}>
               <a
                 href="https://crm.ecole-epoc.fr"
                 target="_blank"
