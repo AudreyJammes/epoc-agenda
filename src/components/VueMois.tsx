@@ -1,9 +1,8 @@
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek,
-  eachDayOfInterval, format, isSameMonth, isSameDay, isToday,
+  eachDayOfInterval, format, isSameMonth, isToday,
   parseISO,
 } from 'date-fns'
-import { fr } from 'date-fns/locale'
 import type { Evenement } from '../types'
 import { TYPE_COLORS, TYPE_LABELS } from '../lib/constants'
 

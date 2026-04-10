@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { format, parseISO, addYears } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { format, parseISO } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
 import type { Evenement, EvenementFormData, TypeEvenement, FrequenceRecurrence } from '../types'
 import { TYPE_LABELS, TYPE_COLORS } from '../lib/constants'

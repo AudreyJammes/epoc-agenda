@@ -59,7 +59,6 @@ export function parseIcs(content: string): Omit<Evenement, 'id' | 'created_at' |
       const dtstart = current['DTSTART'] || current['DTSTART;VALUE=DATE'] || ''
       const dtend   = current['DTEND']   || current['DTEND;VALUE=DATE']   || ''
       const desc    = decodeIcsText(current['DESCRIPTION'] || '').trim() || null
-      const uid     = current['UID'] || null
 
       if (!dtstart) continue
 
@@ -76,16 +75,20 @@ export function parseIcs(content: string): Omit<Evenement, 'id' | 'created_at' |
       if (!refDate || refDate < seuil) continue
 
       evenements.push({
-        titre:          summary,
-        type:           'epoc',
-        journee_entiere: start.journeeEntiere,
-        date_journee:   start.journeeEntiere ? (start.dateOnly ?? null) : null,
-        date_debut:     start.journeeEntiere ? null : (start.timestamptz ?? null),
-        date_fin:       end.journeeEntiere   ? null : (end.timestamptz   ?? null),
-        contact_id:     null,
-        note:           desc,
-        source:         'ics_import',
-        source_id:      null, // les UIDs ICS ne sont pas des UUIDs
+        titre:                summary,
+        type:                 'epoc',
+        journee_entiere:      start.journeeEntiere,
+        date_journee:         start.journeeEntiere ? (start.dateOnly ?? null) : null,
+        date_fin_journee:     null,
+        date_debut:           start.journeeEntiere ? null : (start.timestamptz ?? null),
+        date_fin:             end.journeeEntiere   ? null : (end.timestamptz   ?? null),
+        contact_id:           null,
+        lieu:                 null,
+        note:                 desc,
+        source:               'ics_import',
+        source_id:            null,
+        recurrence_rule:      null,
+        recurrence_groupe_id: null,
       })
 
       continue

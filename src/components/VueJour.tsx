@@ -4,7 +4,7 @@ import {
 } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import type { Evenement } from '../types'
-import { TYPE_COLORS, TYPE_LABELS } from '../lib/constants'
+import { TYPE_COLORS } from '../lib/constants'
 
 interface Props {
   dateRef: Date

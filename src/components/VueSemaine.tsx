@@ -1,6 +1,6 @@
 import {
   startOfWeek, endOfWeek, eachDayOfInterval, format,
-  parseISO, isToday, isSameDay, setHours, setMinutes,
+  parseISO, isToday, setHours, setMinutes,
   differenceInMinutes, getHours, getMinutes,
 } from 'date-fns'
 import { fr } from 'date-fns/locale'

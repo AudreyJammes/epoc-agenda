@@ -72,15 +72,19 @@ export function tacheVersEvenement(
   creneau: { debut: Date; fin: Date }
 ): Omit<Evenement, 'id' | 'created_at' | 'notif_envoyee'> {
   return {
-    titre:           tache.titre,
-    type:            'tache',
-    journee_entiere: false,
-    date_journee:    null,
-    date_debut:      creneau.debut.toISOString(),
-    date_fin:        creneau.fin.toISOString(),
-    contact_id:      tache.contact_id ?? null,
-    note:            tache.description ?? null,
-    source:          'crm_tache',
-    source_id:       tache.id,
+    titre:                tache.titre,
+    type:                 'tache',
+    journee_entiere:      false,
+    date_journee:         null,
+    date_fin_journee:     null,
+    date_debut:           creneau.debut.toISOString(),
+    date_fin:             creneau.fin.toISOString(),
+    contact_id:           tache.contact_id ?? null,
+    lieu:                 null,
+    note:                 tache.description ?? null,
+    source:               'crm_tache',
+    source_id:            tache.id,
+    recurrence_rule:      null,
+    recurrence_groupe_id: null,
   }
 }

@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, parseISO } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { useState, useEffect } from 'react'
+import { format, parseISO } from 'date-fns'
 import VueMois    from '../../components/VueMois'
 import VueSemaine from '../../components/VueSemaine'
 import VueJour    from '../../components/VueJour'
@@ -62,7 +61,7 @@ function planifierNotification(ev: Evenement) {
 }
 
 export default function Agenda() {
-  const { signOut, user } = useAuth()
+  const { signOut } = useAuth()
   const [vue, setVue]       = useState<Vue>(() => (localStorage.getItem('agenda-vue') as Vue) ?? 'semaine')
   const [dateRef, setDateRef] = useState(new Date())
   const [moisRef, setMoisRef] = useState(new Date())
@@ -80,7 +79,6 @@ export default function Agenda() {
   const { data: taches = [] }     = useTaches()
   const { data: relances = [] }   = useRelances()
   const insertMut  = useInsertEvenementsEnMasse()
-  const updateMut  = useUpdateEvenement()
 
   // Sauvegarde la vue active
   useEffect(() => { localStorage.setItem('agenda-vue', vue) }, [vue])
@@ -144,29 +142,37 @@ export default function Agenda() {
         const debut = new Date(`${r.date}T${r.heure}`)
         const fin   = new Date(debut.getTime() + (r.duree ?? 30) * 60 * 1000)
         return {
-          titre:           r.titre,
-          type:            'relance' as const,
-          journee_entiere: false,
-          date_journee:    null,
-          date_debut:      debut.toISOString(),
-          date_fin:        fin.toISOString(),
-          contact_id:      r.contact_id,
-          note:            null,
-          source:          'crm_relance' as const,
-          source_id:       r.id,
+          titre:                r.titre,
+          type:                 'relance' as const,
+          journee_entiere:      false,
+          date_journee:         null,
+          date_fin_journee:     null,
+          date_debut:           debut.toISOString(),
+          date_fin:             fin.toISOString(),
+          contact_id:           r.contact_id,
+          lieu:                 null,
+          note:                 null,
+          source:               'crm_relance' as const,
+          source_id:            r.id,
+          recurrence_rule:      null,
+          recurrence_groupe_id: null,
         }
       } else {
         return {
-          titre:           r.titre,
-          type:            'relance' as const,
-          journee_entiere: true,
-          date_journee:    r.date,
-          date_debut:      null,
-          date_fin:        null,
-          contact_id:      r.contact_id,
-          note:            null,
-          source:          'crm_relance' as const,
-          source_id:       r.id,
+          titre:                r.titre,
+          type:                 'relance' as const,
+          journee_entiere:      true,
+          date_journee:         r.date,
+          date_fin_journee:     null,
+          date_debut:           null,
+          date_fin:             null,
+          contact_id:           r.contact_id,
+          lieu:                 null,
+          note:                 null,
+          source:               'crm_relance' as const,
+          source_id:            r.id,
+          recurrence_rule:      null,
+          recurrence_groupe_id: null,
         }
       }
     })
@@ -199,20 +205,6 @@ export default function Agenda() {
     })
   }, [evenements])
 
-  // ---- Navigation ----
-  function aller(direction: 1 | -1) {
-    setDateRef(prev => {
-      if (vue === 'mois')    return direction === 1 ? addMonths(prev, 1) : subMonths(prev, 1)
-      if (vue === 'semaine') return direction === 1 ? addWeeks(prev, 1)  : subWeeks(prev, 1)
-      return direction === 1 ? addDays(prev, 1) : subDays(prev, 1)
-    })
-  }
-
-  function titreNav(): string {
-    if (vue === 'mois')    return format(dateRef, 'MMMM yyyy', { locale: fr })
-    if (vue === 'semaine') return `Semaine du ${format(dateRef, 'd MMMM', { locale: fr })}`
-    return format(dateRef, 'EEEE d MMMM', { locale: fr })
-  }
 
   function ouvrirNouvelEvenement(date: Date) {
     setDateNouveau(date)

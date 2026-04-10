@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import type { Evenement, EvenementFormData } from '../types'
-import { format, parseISO } from 'date-fns'
+import { format } from 'date-fns'
 
 // Charge tous les événements du mois donné (+ débordement ±7 jours)
 export function useEvenements(annee: number, mois: number) {
