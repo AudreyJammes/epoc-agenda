@@ -86,7 +86,7 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
         style={{ top: HEADER_H, minHeight: JE_H }}
       >
         {/* Étiquette J.E. */}
-        <div className="w-12 flex-shrink-0 flex items-center justify-end pr-1">
+        <div className="w-12 flex-shrink-0 flex items-start justify-end pr-1 pt-1">
           <span className="text-xs text-gray-400">J.E.</span>
         </div>
 
