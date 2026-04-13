@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { format, parseISO, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths } from 'date-fns'
 import VueMois    from '../../components/VueMois'
 import VueSemaine from '../../components/VueSemaine'
@@ -206,6 +206,26 @@ export default function Agenda() {
   }, [evenements])
 
 
+  // ---- Swipe horizontal pour naviguer ----
+  const touchStartX = useRef(0)
+  const touchStartY = useRef(0)
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY) * 1.5) return
+    if (deltaX < 0) {
+      setDateRef(d => vue === 'jour' ? addDays(d, 1) : vue === 'semaine' ? addWeeks(d, 1) : addMonths(d, 1))
+    } else {
+      setDateRef(d => vue === 'jour' ? subDays(d, 1) : vue === 'semaine' ? subWeeks(d, 1) : subMonths(d, 1))
+    }
+  }
+
   function ouvrirNouvelEvenement(date: Date) {
     setDateNouveau(date)
     setModalEv(null)
@@ -339,7 +359,7 @@ export default function Agenda() {
         </button>
 
         {/* Contenu principal */}
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
           {isLoading ? (
             <div className="flex items-center justify-center h-full text-gray-400 text-sm">Chargement…</div>
           ) : vue === 'mois' ? (
