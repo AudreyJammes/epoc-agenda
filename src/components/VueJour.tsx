@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import {
   format, parseISO, isToday, setHours, setMinutes,
   differenceInMinutes, getHours, getMinutes,
@@ -26,6 +27,14 @@ function hauteurPx(debut: Date, fin: Date): number {
 }
 
 export default function VueJour({ dateRef, evenements, onEvenementClick, onNouvelEvenement }: Props) {
+  const grilleRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (grilleRef.current) {
+      grilleRef.current.scrollTop = (9 - HEURE_DEBUT) * HAUTEUR_HEURE
+    }
+  }, [])
+
   const jourStr = format(dateRef, 'yyyy-MM-dd')
   const heures  = Array.from({ length: HEURE_FIN - HEURE_DEBUT }, (_, i) => HEURE_DEBUT + i)
   const total   = heures.length * HAUTEUR_HEURE
@@ -75,7 +84,7 @@ export default function VueJour({ dateRef, evenements, onEvenementClick, onNouve
       )}
 
       {/* Grille horaire */}
-      <div className="flex flex-1 overflow-y-auto">
+      <div ref={grilleRef} className="flex flex-1 overflow-y-auto">
         {/* Heures */}
         <div className="w-16 flex-shrink-0 relative bg-white border-r border-gray-100" style={{ height: total }}>
           {heures.map(h => (

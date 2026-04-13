@@ -62,7 +62,7 @@ function planifierNotification(ev: Evenement) {
 
 export default function Agenda() {
   const { signOut } = useAuth()
-  const [vue, setVue]       = useState<Vue>(() => (localStorage.getItem('agenda-vue') as Vue) ?? 'semaine')
+  const [vue, setVue]       = useState<Vue>('jour')
   const [dateRef, setDateRef] = useState(new Date())
   const [moisRef, setMoisRef] = useState(new Date())
 
