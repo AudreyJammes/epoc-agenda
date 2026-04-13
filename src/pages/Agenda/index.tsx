@@ -114,7 +114,7 @@ export default function Agenda() {
       const ev = tacheVersEvenement(tache, creneau)
       nouveaux.push(ev)
       // Ajouter à la liste de travail pour éviter les chevauchements dans la même passe
-      evsTravail.push({ ...ev, id: 'tmp', created_at: new Date().toISOString(), notif_envoyee: false })
+      evsTravail.push({ ...ev, id: 'tmp', created_at: new Date().toISOString(), notif_envoyee: false, user_id: null })
     }
 
     if (nouveaux.length > 0) {
@@ -374,6 +374,7 @@ export default function Agenda() {
             <VueSemaine
               dateRef={dateRef}
               evenements={evenements}
+              onJourClick={d => { setDateRef(d); setVue('jour') }}
               onEvenementClick={ev => setModalEv(ev)}
               onNouvelEvenement={ouvrirNouvelEvenement}
             />

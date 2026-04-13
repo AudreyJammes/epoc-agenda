@@ -151,7 +151,7 @@ export function useInsertEvenementsEnMasse() {
       const resultats: Evenement[] = []
 
       for (let i = 0; i < evenements.length; i += TAILLE_LOT) {
-        const lot = evenements.slice(i, i + TAILLE_LOT).map(e => ({ ...e, user_id: e.user_id ?? user?.id ?? null }))
+        const lot = evenements.slice(i, i + TAILLE_LOT).map(e => ({ ...e, user_id: user?.id ?? null }))
         const { data, error } = await supabase
           .from('agenda_evenements')
           .insert(lot)

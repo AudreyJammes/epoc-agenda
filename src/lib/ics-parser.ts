@@ -9,7 +9,7 @@ function parseIcsDate(val: string): { timestamptz?: string; dateOnly?: string; j
     const d = val.slice(6, 8)
     return { dateOnly: `${y}-${m}-${d}`, journeeEntiere: true }
   }
-  // Date+heure UTC : YYYYMMDDTHHMMSSZ
+  // Date+heure : YYYYMMDDTHHMMSSZ (UTC) ou YYYYMMDDTHHMMSS (heure locale)
   if (/^\d{8}T\d{6}Z?$/.test(val)) {
     const y = val.slice(0, 4)
     const mo = val.slice(4, 6)
@@ -17,7 +17,11 @@ function parseIcsDate(val: string): { timestamptz?: string; dateOnly?: string; j
     const h = val.slice(9, 11)
     const mi = val.slice(11, 13)
     const s = val.slice(13, 15)
-    const iso = `${y}-${mo}-${d}T${h}:${mi}:${s}Z`
+    const hasZ = val.endsWith('Z')
+    // Avec Z = UTC explicite ; sans Z = heure locale (floating time iCal)
+    const iso = hasZ
+      ? `${y}-${mo}-${d}T${h}:${mi}:${s}Z`
+      : new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}`).toISOString()
     return { timestamptz: iso, journeeEntiere: false }
   }
   return { journeeEntiere: false }

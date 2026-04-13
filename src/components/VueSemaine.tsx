@@ -10,12 +10,13 @@ import { TYPE_COLORS, TYPE_LABELS } from '../lib/constants'
 interface Props {
   dateRef: Date
   evenements: Evenement[]
+  onJourClick: (date: Date) => void
   onEvenementClick: (ev: Evenement) => void
   onNouvelEvenement: (date: Date) => void
 }
 
-const HEURE_DEBUT   = 7
-const HEURE_FIN     = 21
+const HEURE_DEBUT   = 0
+const HEURE_FIN     = 24
 const HAUTEUR_HEURE = 60  // px par heure
 const HEADER_H      = 64  // px — hauteur de la rangée d'en-têtes
 const JE_H          = 28  // px — hauteur minimale de la bande J.E.
@@ -28,7 +29,7 @@ function hauteurPx(debut: Date, fin: Date): number {
   return Math.max(differenceInMinutes(fin, debut) / 60 * HAUTEUR_HEURE, 20)
 }
 
-export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNouvelEvenement }: Props) {
+export default function VueSemaine({ dateRef, evenements, onJourClick, onEvenementClick, onNouvelEvenement }: Props) {
   const debutSemaine = startOfWeek(dateRef, { weekStartsOn: 1 })
   const finSemaine   = endOfWeek(dateRef,   { weekStartsOn: 1 })
   const jours        = eachDayOfInterval({ start: debutSemaine, end: finSemaine })
@@ -71,9 +72,12 @@ export default function VueSemaine({ dateRef, evenements, onEvenementClick, onNo
         {jours.map(jour => (
           <div key={jour.toISOString()} className="flex-1 text-center py-2 border-l border-gray-100">
             <div className="text-xs text-gray-500 uppercase">{format(jour, 'EEE', { locale: fr })}</div>
-            <div className={`text-sm font-semibold mx-auto w-8 h-8 flex items-center justify-center rounded-full ${
-              isToday(jour) ? 'bg-epoc-navy text-white' : 'text-gray-800'
-            }`}>
+            <div
+              onClick={() => onJourClick(jour)}
+              className={`text-sm font-semibold mx-auto w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:ring-2 hover:ring-epoc-navy/30 transition-all ${
+                isToday(jour) ? 'bg-epoc-navy text-white' : 'text-gray-800'
+              }`}
+            >
               {format(jour, 'd')}
             </div>
           </div>

@@ -13,8 +13,8 @@ interface Props {
   onNouvelEvenement: (date: Date) => void
 }
 
-const HEURE_DEBUT    = 7
-const HEURE_FIN      = 21
+const HEURE_DEBUT    = 0
+const HEURE_FIN      = 24
 const HAUTEUR_HEURE  = 80 // px par heure (plus grand pour le jour)
 
 function topPx(date: Date): number {
