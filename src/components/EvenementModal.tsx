@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { format, parseISO } from 'date-fns'
+import { format, parseISO, addDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
 import type { Evenement, EvenementFormData, TypeEvenement, FrequenceRecurrence } from '../types'
 import { TYPE_LABELS, TYPE_COLORS } from '../lib/constants'
@@ -17,6 +17,47 @@ interface Props {
 }
 
 const TYPES: TypeEvenement[] = ['perso', 'ateliers', 'epoc', 'fetes_anniversaires', 'relance', 'tache']
+
+function genererICS(ev: Evenement): string {
+  const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n')
+  const dtstamp = format(new Date(), "yyyyMMdd'T'HHmmss'Z'")
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//EPOC//Agenda EPOC//FR',
+    'BEGIN:VEVENT',
+    `UID:${ev.id}@agenda.ecole-epoc.fr`,
+    `DTSTAMP:${dtstamp}`,
+  ]
+  if (ev.journee_entiere && ev.date_journee) {
+    lines.push(`DTSTART;VALUE=DATE:${ev.date_journee.replace(/-/g, '')}`)
+    const finDate = addDays(new Date(ev.date_fin_journee ?? ev.date_journee), 1)
+    lines.push(`DTEND;VALUE=DATE:${format(finDate, 'yyyyMMdd')}`)
+  } else if (ev.date_debut && ev.date_fin) {
+    lines.push(`DTSTART:${format(parseISO(ev.date_debut), "yyyyMMdd'T'HHmmss")}`)
+    lines.push(`DTEND:${format(parseISO(ev.date_fin), "yyyyMMdd'T'HHmmss")}`)
+  } else {
+    return ''
+  }
+  lines.push(`SUMMARY:${esc(ev.titre)}`)
+  if (ev.lieu) lines.push(`LOCATION:${esc(ev.lieu)}`)
+  if (ev.lien) lines.push(`URL:${ev.lien}`)
+  if (ev.note) lines.push(`DESCRIPTION:${esc(ev.note)}`)
+  lines.push('END:VEVENT', 'END:VCALENDAR')
+  return lines.join('\r\n')
+}
+
+function telechargerICS(ev: Evenement) {
+  const content = genererICS(ev)
+  if (!content) return
+  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${ev.titre.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 const JOURS_SEMAINE = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
@@ -39,6 +80,7 @@ function defaultForm(evenement?: Evenement | null, dateInitiale?: Date): Eveneme
       heure_fin:            evenement.date_fin   ? format(parseISO(evenement.date_fin),   'HH:mm') : '10:00',
       contact_id:           evenement.contact_id ?? '',
       lieu:                 evenement.lieu ?? '',
+      lien:                 evenement.lien ?? '',
       note:                 evenement.note ?? '',
       recurrence:           false,
       recurrence_frequence: 'hebdomadaire',
@@ -58,6 +100,7 @@ function defaultForm(evenement?: Evenement | null, dateInitiale?: Date): Eveneme
     heure_fin:            format(heureFin, 'HH:mm'),
     contact_id:           '',
     lieu:                 '',
+    lien:                 '',
     note:                 '',
     recurrence:           false,
     recurrence_frequence: 'hebdomadaire',
@@ -140,6 +183,7 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
           date_fin:         form.journee_entiere ? null : new Date(`${form.date_debut}T${form.heure_fin}:00`).toISOString(),
           contact_id:       form.contact_id || null,
           lieu:             form.lieu || null,
+          lien:             form.lien || null,
           note:             form.note || null,
         })
       }
@@ -418,16 +462,28 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
             )}
           </div>
 
-          {/* Lieu */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Lieu</label>
-            <input
-              type="text"
-              value={form.lieu}
-              onChange={e => set('lieu', e.target.value)}
-              placeholder="Adresse, salle, lien visio…"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-epoc-navy/30"
-            />
+          {/* Lieu + Lien */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Lieu</label>
+              <input
+                type="text"
+                value={form.lieu}
+                onChange={e => set('lieu', e.target.value)}
+                placeholder="Adresse, salle…"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-epoc-navy/30"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Lien visio</label>
+              <input
+                type="url"
+                value={form.lien}
+                onChange={e => set('lien', e.target.value)}
+                placeholder="https://zoom.us/…"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-epoc-navy/30"
+              />
+            </div>
           </div>
 
           {/* Note */}
@@ -449,20 +505,30 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
           {/* Actions */}
           <div className="flex items-center justify-between pt-2 border-t border-gray-100">
             {isEditing ? (
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={loading}
-                className={`text-sm px-3 py-2 rounded-lg transition-colors ${
-                  confirmDelete
-                    ? 'bg-red-500 text-white hover:bg-red-600'
-                    : 'text-red-400 hover:text-red-600 hover:bg-red-50'
-                }`}
-              >
-                {confirmDelete
-                  ? (isSerie ? 'Confirmer (toute la série)' : 'Confirmer')
-                  : (isSerie ? 'Supprimer la série' : 'Supprimer')}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => telechargerICS(evenement!)}
+                  className="text-sm px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                  title="Télécharger l'invitation (.ics)"
+                >
+                  📅 Invitation
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={loading}
+                  className={`text-sm px-3 py-2 rounded-lg border transition-colors ${
+                    confirmDelete
+                      ? 'bg-red-500 text-white border-red-500 hover:bg-red-600'
+                      : 'bg-red-50 text-red-500 border-red-200 hover:bg-red-100'
+                  }`}
+                >
+                  {confirmDelete
+                    ? (isSerie ? 'Confirmer (toute la série)' : 'Confirmer')
+                    : (isSerie ? 'Supprimer la série' : '🗑 Supprimer')}
+                </button>
+              </div>
             ) : <div />}
 
             <div className="flex gap-2">

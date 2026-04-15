@@ -88,6 +88,7 @@ export function parseIcs(content: string): Omit<Evenement, 'id' | 'created_at' |
         date_fin:             end.journeeEntiere   ? null : (end.timestamptz   ?? null),
         contact_id:           null,
         lieu:                 null,
+        lien:                 null,
         note:                 desc,
         source:               'ics_import',
         source_id:            null,

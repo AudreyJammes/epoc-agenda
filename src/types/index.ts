@@ -13,6 +13,7 @@ export interface Evenement {
   date_fin_journee: string | null
   contact_id: string | null
   lieu: string | null
+  lien: string | null
   note: string | null
   source: SourceEvenement
   source_id: string | null
@@ -63,6 +64,7 @@ export interface EvenementFormData {
   heure_fin: string
   contact_id: string
   lieu: string
+  lien: string
   note: string
   // Récurrence
   recurrence: boolean

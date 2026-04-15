@@ -81,6 +81,7 @@ export function tacheVersEvenement(
     date_fin:             creneau.fin.toISOString(),
     contact_id:           tache.contact_id ?? null,
     lieu:                 null,
+    lien:                 null,
     note:                 tache.description ?? null,
     source:               'crm_tache',
     source_id:            tache.id,
