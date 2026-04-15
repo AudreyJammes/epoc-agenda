@@ -3,6 +3,7 @@ import {
   eachDayOfInterval, format, isSameMonth, isToday,
   parseISO,
 } from 'date-fns'
+import { fr } from 'date-fns/locale'
 import type { Evenement } from '../types'
 import { TYPE_COLORS, TYPE_LABELS } from '../lib/constants'
 
@@ -39,6 +40,13 @@ export default function VueMois({ dateRef, evenements, onJourClick, onEvenementC
 
   return (
     <div className="flex flex-col h-full">
+      {/* Titre du mois */}
+      <div className="px-4 py-2 border-b border-gray-200 bg-white">
+        <h2 className="text-base font-bold text-gray-800 capitalize">
+          {format(dateRef, 'MMMM yyyy', { locale: fr })}
+        </h2>
+      </div>
+
       {/* En-têtes jours */}
       <div className="grid grid-cols-7 border-b border-gray-200">
         {joursEnTete.map(j => (

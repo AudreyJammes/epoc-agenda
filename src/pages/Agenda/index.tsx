@@ -238,7 +238,7 @@ export default function Agenda() {
         {/* Titre + nav */}
         <div className="flex items-center gap-1 min-w-0">
           <button
-            onClick={() => setDateRef(new Date())}
+            onClick={() => { setDateRef(new Date()); setModalEv(undefined); setDateNouveau(null) }}
             className="px-2.5 py-1 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 flex-shrink-0"
           >
             Aujourd'hui

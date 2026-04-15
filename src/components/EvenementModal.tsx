@@ -46,6 +46,7 @@ function defaultForm(evenement?: Evenement | null, dateInitiale?: Date): Eveneme
       recurrence_jusqu_au:  '',
     }
   }
+  const heureFin = new Date(d.getTime() + 60 * 60 * 1000)
   return {
     titre:                '',
     type:                 'epoc',
@@ -53,8 +54,8 @@ function defaultForm(evenement?: Evenement | null, dateInitiale?: Date): Eveneme
     date_journee:         format(d, 'yyyy-MM-dd'),
     date_fin_journee:     format(d, 'yyyy-MM-dd'),
     date_debut:           format(d, 'yyyy-MM-dd'),
-    heure_debut:          '09:00',
-    heure_fin:            '10:00',
+    heure_debut:          format(d, 'HH:mm'),
+    heure_fin:            format(heureFin, 'HH:mm'),
     contact_id:           '',
     lieu:                 '',
     note:                 '',
