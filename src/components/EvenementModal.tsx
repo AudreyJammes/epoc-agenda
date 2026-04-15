@@ -270,7 +270,16 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
                   type="time"
                   step="300"
                   value={form.heure_debut}
-                  onChange={e => set('heure_debut', e.target.value)}
+                  onChange={e => {
+                    const newDebut = e.target.value
+                    const [dh, dm] = form.heure_debut.split(':').map(Number)
+                    const [fh, fm] = form.heure_fin.split(':').map(Number)
+                    const dureeMin = (fh * 60 + fm) - (dh * 60 + dm)
+                    const [nh, nm] = newDebut.split(':').map(Number)
+                    const finTotalMin = Math.min(nh * 60 + nm + dureeMin, 23 * 60 + 55)
+                    const newFin = `${String(Math.floor(finTotalMin / 60)).padStart(2, '0')}:${String(finTotalMin % 60).padStart(2, '0')}`
+                    setForm(f => ({ ...f, heure_debut: newDebut, heure_fin: newFin }))
+                  }}
                   className="w-full border border-gray-200 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-epoc-navy/30"
                 />
               </div>
