@@ -39,7 +39,12 @@ export default function VueJour({ dateRef, evenements, onEvenementClick, onNouve
   const heures  = Array.from({ length: HEURE_FIN - HEURE_DEBUT }, (_, i) => HEURE_DEBUT + i)
   const total   = heures.length * HAUTEUR_HEURE
 
-  const evJournee = evenements.filter(e => e.journee_entiere && e.date_journee === jourStr)
+  const evJournee = evenements.filter(e => {
+    if (!e.journee_entiere) return false
+    const debut = e.date_journee ?? ''
+    const fin   = e.date_fin_journee ?? debut
+    return jourStr >= debut && jourStr <= fin
+  })
   const evHoraires = evenements.filter(e =>
     !e.journee_entiere &&
     e.date_debut &&

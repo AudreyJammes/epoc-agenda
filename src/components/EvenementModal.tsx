@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { format, parseISO, addDays } from 'date-fns'
+import { format, parseISO } from 'date-fns'
+import { supabase } from '../lib/supabase'
 import { v4 as uuidv4 } from 'uuid'
 import type { Evenement, EvenementFormData, TypeEvenement, FrequenceRecurrence } from '../types'
 import { TYPE_LABELS, TYPE_COLORS } from '../lib/constants'
@@ -18,46 +19,6 @@ interface Props {
 
 const TYPES: TypeEvenement[] = ['perso', 'ateliers', 'epoc', 'fetes_anniversaires', 'relance', 'tache']
 
-function genererICS(ev: Evenement): string {
-  const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n')
-  const dtstamp = format(new Date(), "yyyyMMdd'T'HHmmss'Z'")
-  const lines = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//EPOC//Agenda EPOC//FR',
-    'BEGIN:VEVENT',
-    `UID:${ev.id}@agenda.ecole-epoc.fr`,
-    `DTSTAMP:${dtstamp}`,
-  ]
-  if (ev.journee_entiere && ev.date_journee) {
-    lines.push(`DTSTART;VALUE=DATE:${ev.date_journee.replace(/-/g, '')}`)
-    const finDate = addDays(new Date(ev.date_fin_journee ?? ev.date_journee), 1)
-    lines.push(`DTEND;VALUE=DATE:${format(finDate, 'yyyyMMdd')}`)
-  } else if (ev.date_debut && ev.date_fin) {
-    lines.push(`DTSTART:${format(parseISO(ev.date_debut), "yyyyMMdd'T'HHmmss")}`)
-    lines.push(`DTEND:${format(parseISO(ev.date_fin), "yyyyMMdd'T'HHmmss")}`)
-  } else {
-    return ''
-  }
-  lines.push(`SUMMARY:${esc(ev.titre)}`)
-  if (ev.lieu) lines.push(`LOCATION:${esc(ev.lieu)}`)
-  if (ev.lien) lines.push(`URL:${ev.lien}`)
-  if (ev.note) lines.push(`DESCRIPTION:${esc(ev.note)}`)
-  lines.push('END:VEVENT', 'END:VCALENDAR')
-  return lines.join('\r\n')
-}
-
-function telechargerICS(ev: Evenement) {
-  const content = genererICS(ev)
-  if (!content) return
-  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${ev.titre.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`
-  a.click()
-  URL.revokeObjectURL(url)
-}
 
 const JOURS_SEMAINE = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
@@ -124,6 +85,8 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
   const [contactSearch, setContactSearch] = useState('')
   const [showContactList, setShowContactList] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [invitLoading, setInvitLoading]   = useState(false)
+  const [invitMsg, setInvitMsg]           = useState<{ ok: boolean; text: string } | null>(null)
   const contactRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -198,6 +161,35 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
       await createMut.mutateAsync(form)
     }
     onClose()
+  }
+
+  async function envoyerInvitation() {
+    if (!evenement) return
+    const contact = contacts.find(c => c.id === evenement.contact_id)
+    if (!contact) {
+      setInvitMsg({ ok: false, text: 'Aucun contact lié à cet événement.' })
+      return
+    }
+    if (!contact.email?.trim()) {
+      setInvitMsg({ ok: false, text: `${contactLabel(contact)} n'a pas d'adresse email.` })
+      return
+    }
+    setInvitLoading(true)
+    setInvitMsg(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('send-invitation', {
+        body: { evenement_id: evenement.id, contact_id: evenement.contact_id },
+      })
+      if (error || !data?.success) {
+        setInvitMsg({ ok: false, text: error?.message ?? 'Échec de l\'envoi.' })
+      } else {
+        setInvitMsg({ ok: true, text: `Invitation envoyée à ${contact.email}.` })
+      }
+    } catch {
+      setInvitMsg({ ok: false, text: 'Erreur réseau.' })
+    } finally {
+      setInvitLoading(false)
+    }
   }
 
   async function handleDelete() {
@@ -503,16 +495,23 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+          <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
+            {invitMsg && (
+              <p className={`text-xs px-3 py-2 rounded-lg ${invitMsg.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                {invitMsg.text}
+              </p>
+            )}
+            <div className="flex items-center justify-between">
             {isEditing ? (
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => telechargerICS(evenement!)}
-                  className="text-sm px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-                  title="Télécharger l'invitation (.ics)"
+                  onClick={envoyerInvitation}
+                  disabled={invitLoading || loading}
+                  className="text-sm px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Envoyer l'invitation par email au contact"
                 >
-                  📅 Invitation
+                  {invitLoading ? '…' : '📅 Invitation'}
                 </button>
                 <button
                   type="button"
@@ -546,6 +545,7 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
               >
                 {loading ? '…' : isEditing ? 'Enregistrer' : (form.recurrence ? 'Créer la série' : 'Créer')}
               </button>
+            </div>
             </div>
           </div>
         </form>
