@@ -165,7 +165,8 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
 
   async function envoyerInvitation() {
     if (!evenement) return
-    const contact = contacts.find(c => c.id === evenement.contact_id)
+    const contactId = form.contact_id || evenement.contact_id
+    const contact = contacts.find(c => c.id === contactId)
     if (!contact) {
       setInvitMsg({ ok: false, text: 'Aucun contact lié à cet événement.' })
       return
@@ -178,7 +179,7 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
     setInvitMsg(null)
     try {
       const { data, error } = await supabase.functions.invoke('send-invitation', {
-        body: { evenement_id: evenement.id, contact_id: evenement.contact_id },
+        body: { evenement_id: evenement.id, contact_id: contactId },
       })
       if (error || !data?.success) {
         setInvitMsg({ ok: false, text: error?.message ?? 'Échec de l\'envoi.' })
