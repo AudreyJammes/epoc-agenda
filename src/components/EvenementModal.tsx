@@ -182,12 +182,13 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
         body: { evenement_id: evenement.id, contact_id: contactId },
       })
       if (error || !data?.success) {
-        setInvitMsg({ ok: false, text: error?.message ?? 'Échec de l\'envoi.' })
+        setInvitMsg({ ok: false, text: error?.message ?? data?.error ?? 'Échec de l\'envoi.' })
       } else {
         setInvitMsg({ ok: true, text: `Invitation envoyée à ${contact.email}.` })
       }
-    } catch {
-      setInvitMsg({ ok: false, text: 'Erreur réseau.' })
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      setInvitMsg({ ok: false, text: `Erreur : ${msg}` })
     } finally {
       setInvitLoading(false)
     }
