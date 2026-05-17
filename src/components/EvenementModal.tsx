@@ -193,6 +193,7 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
         setInvitMsg({ ok: false, text: json.error ?? 'Échec de l\'envoi.' })
       } else {
         setInvitMsg({ ok: true, text: `Invitation envoyée à ${contact.email}.` })
+        if (json.lien && !form.lien) set('lien', json.lien)
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e)
