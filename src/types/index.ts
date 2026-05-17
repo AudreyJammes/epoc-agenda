@@ -21,6 +21,7 @@ export interface Evenement {
   recurrence_groupe_id: string | null
   user_id: string | null
   notif_envoyee: boolean
+  invitation_envoyee?: boolean
   created_at: string
 }
 

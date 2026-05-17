@@ -510,6 +510,11 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
 
           {/* Actions */}
           <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
+            {evenement?.invitation_envoyee && !invitMsg && (
+              <p className="text-xs px-3 py-2 rounded-lg bg-blue-50 text-blue-700">
+                ✓ Invitation déjà envoyée
+              </p>
+            )}
             {invitMsg && (
               <p className={`text-xs px-3 py-2 rounded-lg ${invitMsg.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
                 {invitMsg.text}
@@ -525,7 +530,7 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
                   className="text-sm px-3 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Envoyer l'invitation par email au contact"
                 >
-                  {invitLoading ? '…' : '📅 Invitation'}
+                  {invitLoading ? '…' : evenement?.invitation_envoyee ? '📅 Renvoyer' : '📅 Invitation'}
                 </button>
                 <button
                   type="button"
