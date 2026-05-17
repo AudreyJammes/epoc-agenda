@@ -178,11 +178,19 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
     setInvitLoading(true)
     setInvitMsg(null)
     try {
-      const { data, error } = await supabase.functions.invoke('send-invitation', {
-        body: { evenement_id: evenement.id, contact_id: contactId },
+      const { data: { session } } = await supabase.auth.getSession()
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-invitation`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token ?? ''}`,
+        },
+        body: JSON.stringify({ evenement_id: evenement.id, contact_id: contactId }),
       })
-      if (error || !data?.success) {
-        setInvitMsg({ ok: false, text: error?.message ?? data?.error ?? 'Échec de l\'envoi.' })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json.success) {
+        setInvitMsg({ ok: false, text: json.error ?? 'Échec de l\'envoi.' })
       } else {
         setInvitMsg({ ok: true, text: `Invitation envoyée à ${contact.email}.` })
       }
