@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 import type { Evenement, EvenementFormData, TypeEvenement, FrequenceRecurrence } from '../types'
 import { TYPE_LABELS, TYPE_COLORS } from '../lib/constants'
 import { useContacts, contactLabel } from '../hooks/useContacts'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   useCreateEvenement, useUpdateEvenement, useDeleteEvenement,
   useInsertEvenementsEnMasse, useDeleteSerie,
@@ -74,6 +75,7 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
   const isEditing = !!evenement
   const isSerie   = !!evenement?.recurrence_groupe_id
 
+  const queryClient  = useQueryClient()
   const { data: contacts = [] } = useContacts()
   const createMut    = useCreateEvenement()
   const updateMut    = useUpdateEvenement()
@@ -194,6 +196,7 @@ export default function EvenementModal({ evenement, dateInitiale, onClose }: Pro
       } else {
         setInvitMsg({ ok: true, text: `Invitation envoyée à ${contact.email}.` })
         if (json.lien && !form.lien) set('lien', json.lien)
+        queryClient.invalidateQueries({ queryKey: ['evenements'] })
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e)
